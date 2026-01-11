@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>CONTACT_NOT_FOUND</fullName>
+        <categories>API_ERROR</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Api error message for missing contact</shortDescription>
+        <value>No contact found for the provided UUID.</value>
+    </labels>
+    <labels>
+        <fullName>INTERNAL_ERROR</fullName>
+        <categories>API_ERROR</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Api error message for internal error</shortDescription>
+        <value>An unexpected error occurred.</value>
+    </labels>
+    <labels>
+        <fullName>UUID_MISSING</fullName>
+        <categories>API_ERROR</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>API Missing UUID error message</shortDescription>
+        <value>UUID is required.</value>
+    </labels>
+</CustomLabels>

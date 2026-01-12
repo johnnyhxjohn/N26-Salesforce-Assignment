@@ -11,3 +11,5 @@
 - Product__c on product must be a plan record type
 - Services related to "X Plan" product have their prices handle in pricebooks
 - LWC contactPlanDetails is set in Case flexipage to display customer plan details
+- Custom Labels handles API responses to avoid strings and changes in the code for responses
+- Trigger logic on contact on before insert to generate UUID

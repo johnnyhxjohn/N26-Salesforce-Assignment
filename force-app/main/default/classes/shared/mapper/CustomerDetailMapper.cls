@@ -11,12 +11,12 @@ public with sharing class CustomerDetailMapper {
     }
 
     public PlanDetailsDTO toApiResponse(Contact contact) {
+        // Since we are using UUID in the API, products could also return ExternalId as UUID instead Salesforce Id
+        PlanDetailsDTO planDetails = getCustomerPlanDetailsDTO(contact.Product__r.Name, contact.Home_Country__c);
         planDetails.firstName = contact.FirstName;
         planDetails.lastName = contact.LastName;
         planDetails.email = contact.Email;
         planDetails.uuid = contact.ExternalId__c;
-        // Since we are using UUID in the API, products could also return ExternalId as UUID instead Salesforce Id
-        PlanDetailsDTO planDetails = getCustomerPlanDetailsDTO(contact.Product__r.Name, contact.Home_Country__c);
         return planDetails;
     }
 
@@ -40,6 +40,7 @@ public with sharing class CustomerDetailMapper {
                 planService.fee = (pbEntry.Fee__c != 0) 
                     ? String.valueOf(pbEntry.Fee__c) + '%'
                     : 'Free';
+                planService.priceFormatted = '-';
             }
             planServices.add(planService);
         }

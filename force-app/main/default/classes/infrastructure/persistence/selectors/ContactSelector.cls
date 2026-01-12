@@ -1,7 +1,7 @@
 public with sharing class ContactSelector {
 
     public static List<Contact> getByIds(Set<Id> contactIds) {
-        List<Contact> contacts = [SELECT Id, Home_Country__c, Product__c FROM Contact WHERE Id IN:contactIds];
+        List<Contact> contacts = [SELECT Id, Home_Country__c, Product__c, ExternalId__c FROM Contact WHERE Id IN:contactIds];
         return contacts;
     }
 

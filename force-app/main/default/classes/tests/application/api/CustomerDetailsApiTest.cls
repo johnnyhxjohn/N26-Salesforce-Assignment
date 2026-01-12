@@ -2,7 +2,7 @@
 private class CustomerDetailsApiTest {
 
     @TestSetup
-    static void setup() {
+    public static void setup() {
         Product2 product = new Product2(Name='Metal Plan');
         insert product;
 
@@ -22,57 +22,69 @@ private class CustomerDetailsApiTest {
             FirstName = 'John',
             LastName = 'Doe',
             Home_Country__c = 'DE',
-            Product__c = product.Id,
-            ExternalId__c = 'valid-uuid'
+            Product__c = product.Id
         ));
 
         contacts.add(new Contact(
             FirstName = 'John',
-            LastName = 'No Country',
-            ExternalId__c = 'no-country'
+            LastName = 'No Country'
         ));
 
         insert contacts;
     }
 
     @IsTest
-    static void whenContactFound() {
-        Test.setMock(HttpCalloutMock.class, new ContactApiCalloutMock());
+    public static void whenContactFound() {
 
+        Contact contact = [SELECT ExternalId__c FROM Contact WHERE LastName = 'Doe' LIMIT 1];
         RestRequest req = new RestRequest();
-        req.requestUri = '/services/apexrest/api/v1/customer/valid-uuid';
+        req.requestUri = '/services/apexrest/api/v1/customer/' + contact.ExternalId__c;
         req.httpMethod = 'GET';
         RestContext.request = req;
         RestContext.response = new RestResponse();
-
+    
+        Test.startTest();
         CustomerDetailsApi.getContactByUUID();
-
         System.assertEquals(200, RestContext.response.statusCode);
+        
         String resp = RestContext.response.responseBody.toString();
-        System.assert(resp.contains('John'));
+        
+        Map<String,Object> details = (Map<String,Object>) JSON.deserializeUntyped(resp);
+        PlanDetailsDTO planDetails = (PlanDetailsDTO) JSON.deserialize((JSON.serialize(details.get('data'))), PlanDetailsDTO.class);
+
+        System.assertEquals(details.get('error'), null);
+        System.assertEquals(planDetails.lastName, 'Doe');
+        System.assertEquals(planDetails.planServices.size(), 1);
+        Test.stopTest();
     }
 
     @IsTest
-    static void whenContactFoundNoCountry() {
-        Test.setMock(HttpCalloutMock.class, new ContactApiCalloutMock());
-
+    public static void whenContactFoundNoCountry() {
+        Contact noCountryContact = [SELECT ExternalId__c FROM Contact WHERE LastName = 'No Country' LIMIT 1];
         RestRequest req = new RestRequest();
-        req.requestUri = '/services/apexrest/api/v1/customer/no-country';
+        req.requestUri = '/services/apexrest/api/v1/customer/' + noCountryContact.ExternalId__c;
         req.httpMethod = 'GET';
         RestContext.request = req;
         RestContext.response = new RestResponse();
-
+        
+        Test.startTest();
         CustomerDetailsApi.getContactByUUID();
 
         System.assertEquals(200, RestContext.response.statusCode);
+        
         String resp = RestContext.response.responseBody.toString();
-        System.assert(resp.contains('No Country'));
+
+        Map<String,Object> details = (Map<String,Object>) JSON.deserializeUntyped(resp);
+        PlanDetailsDTO planDetails = (PlanDetailsDTO) JSON.deserialize((JSON.serialize(details.get('data'))), PlanDetailsDTO.class);
+
+        System.assertEquals(details.get('error'), null);
+        System.assertEquals(planDetails.lastName, 'No Country');
+        System.assertEquals(planDetails.planServices.size(), 0);
+        Test.stopTest();
     }
 
     @IsTest
-    static void whenContactNotFound() {
-        Test.setMock(HttpCalloutMock.class, new ContactApiCalloutMock());
-
+    public static void whenContactNotFound() {
         RestRequest req = new RestRequest();
         req.requestUri = '/services/apexrest/api/v1/customer/invalid-uuid';
         req.httpMethod = 'GET';
@@ -84,11 +96,14 @@ private class CustomerDetailsApiTest {
         System.assertEquals(404, RestContext.response.statusCode);
         
         String resp = RestContext.response.responseBody.toString();
-        System.assert(resp.contains('CONTACT_NOT_FOUND'));
+        ApiResponseDTO details = (ApiResponseDTO) JSON.deserialize(resp, ApiResponseDTO.class);
+        
+        System.assertEquals(details.error.errorCode, 'CONTACT_NOT_FOUND');
+        System.assertEquals(details.data, null);
     }
 
     @IsTest
-    static void whenMissingUUID() {
+    public static void whenMissingUUID() {
         RestRequest req = new RestRequest();
         req.requestUri = '/services/apexrest/api/v1/customer/';
         req.httpMethod = 'GET';
@@ -100,28 +115,9 @@ private class CustomerDetailsApiTest {
         System.assertEquals(400, RestContext.response.statusCode);
 
         String resp = RestContext.response.responseBody.toString();
-        System.assert(resp.contains('UUID_MISSING'));
-    }
+        ApiResponseDTO details = (ApiResponseDTO) JSON.deserialize(resp, ApiResponseDTO.class);
 
-    public class ContactApiCalloutMock implements HttpCalloutMock {
-        
-        public HTTPResponse respond(HTTPRequest req) {
-            HttpResponse res = new HttpResponse();
-            
-            if (req.getEndpoint().contains('valid-uuid')) {
-                res.setStatusCode(200);
-                res.setHeader('Content-Type', 'application/json');
-                res.setBody('{"id":"001xxx","firstName":"John","lastName":"Doe"}');
-            } else if (req.getEndpoint().contains('no-country')) {
-                res.setStatusCode(200);
-                res.setHeader('Content-Type', 'application/json');
-                res.setBody('{"id":"001xxx","firstName":"John","lastName":"No Country"}');
-            } else {
-                res.setStatusCode(404);
-                res.setHeader('Content-Type', 'application/json');
-                res.setBody('{"errorCode":"CONTACT_NOT_FOUND","message":"No contact found"}');
-            }
-            return res;
-        }
+        System.assertEquals(details.error.errorCode, 'UUID_MISSING');
+        System.assertEquals(details.data, null);        
     }
 }

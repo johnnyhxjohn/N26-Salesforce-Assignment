@@ -10,28 +10,28 @@ public with sharing class CustomerDetailMapper {
         this.pricebookEntries = pricebookEntries;
     }
 
-    public PlanDetailsDTO toApiResponse(Contact contact) {
+    public CustomerDetailsDTO toApiResponse(Contact contact) {
         // Since we are using UUID in the API, products could also return ExternalId as UUID instead Salesforce Id
-        PlanDetailsDTO planDetails = getCustomerPlanDetailsDTO(contact.Product__r.Name, contact.Home_Country__c);
-        planDetails.firstName = contact.FirstName;
-        planDetails.lastName = contact.LastName;
-        planDetails.email = contact.Email;
-        planDetails.uuid = contact.ExternalId__c;
-        return planDetails;
+        CustomerDetailsDTO customerDetails = getCustomerPlanDetailsDTO(contact.Product__r.Name, contact.Home_Country__c);
+        customerDetails.firstName = contact.FirstName;
+        customerDetails.lastName = contact.LastName;
+        customerDetails.email = contact.Email;
+        customerDetails.uuid = contact.ExternalId__c;
+        return customerDetails;
     }
 
-    public PlanDetailsDTO getCustomerPlanDetailsDTO(String planType, String country) {
-        PlanDetailsDTO planDetails = new PlanDetailsDTO();
-        planDetails.planServices = populatePlanServices();
-        planDetails.planType = planType;
-        planDetails.country = country;
-        return planDetails;
+    public CustomerDetailsDTO getCustomerPlanDetailsDTO(String planType, String country) {
+        CustomerDetailsDTO customerDetails = new CustomerDetailsDTO();
+        customerDetails.planServices = populatePlanServices();
+        customerDetails.planType = planType;
+        customerDetails.country = country;
+        return customerDetails;
     }
     
-    private List<PlanDetailsDTO.PlanService> populatePlanServices() {
-        List<PlanDetailsDTO.PlanService> planServices = new List<PlanDetailsDTO.PlanService>();
+    private List<CustomerDetailsDTO.PlanService> populatePlanServices() {
+        List<CustomerDetailsDTO.PlanService> planServices = new List<CustomerDetailsDTO.PlanService>();
         for(PricebookEntry pbEntry : this.pricebookEntries) {
-            PlanDetailsDTO.PlanService planService = new PlanDetailsDTO.PlanService();
+            CustomerDetailsDTO.PlanService planService = new CustomerDetailsDTO.PlanService();
             planService.productId = pbEntry.Product2Id;
             planService.name = pbEntry.Product2.Name;
             planService.price = pbEntry.UnitPrice;

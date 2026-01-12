@@ -1,4 +1,4 @@
-global with sharing class PlanDetailsDTO {
+global with sharing class CustomerDetailsDTO {
     global String firstName;
     global String lastName;
     global String email;

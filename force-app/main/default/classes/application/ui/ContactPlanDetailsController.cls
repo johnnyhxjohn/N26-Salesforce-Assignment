@@ -1,6 +1,6 @@
 public class ContactPlanDetailsController {
     @AuraEnabled(cacheable=true)
-    public static PlanDetailsDTO getPlanServices(Id recordId) {
+    public static CustomerDetailsDTO getPlanServices(Id recordId) {
         Case caseObject = CaseSelector.getById(recordId);
         // To reduce amount of queries in a potential increase of scope, the pricebookEntries can be retrieve in a subquery in Pricebook query
         Pricebook2 countryPricebook = PricebookSelector.getByCountry(caseObject.Contact.Home_Country__c);
